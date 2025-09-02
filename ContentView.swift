@@ -21,11 +21,15 @@ struct ContentView: View {
                     Text("Videos")
                 }
 
+            // Temporarily hidden Fan Art tab for testing.
+            // To restore, uncomment this block.
+            /*
             FanArtView()
                 .tabItem {
                     Image(systemName: "paintpalette.fill")
                     Text("Fan Art")
                 }
+            */
 
             ProfileView()
                 .tabItem {

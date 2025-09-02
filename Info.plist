@@ -9,5 +9,7 @@
 		<string>fetch</string>
 		<string>processing</string>
 	</array>
+	<key>YouTubeAPIKey</key>
+	<string>AIzaSyC2OviBSUQ4TIzR76g0doH6HX2b32LI10s</string>
 </dict>
 </plist>

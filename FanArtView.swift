@@ -10,39 +10,50 @@ import SwiftUI
 struct FanArtView: View {
     @EnvironmentObject private var theme: ThemeManager
     @Environment(\.colorScheme) private var colorScheme
-    private let columns = [GridItem(.flexible()), GridItem(.flexible())]
 
     var body: some View {
         let palette = theme.palette(for: colorScheme)
 
         NavigationStack {
-            ScrollView {
-                LazyVGrid(columns: columns, spacing: 16) {
-                    ForEach(0..<12, id: \.self) { index in
-                        let isEven = index.isMultiple(of: 2)
-                        let colors: [Color] = isEven
-                            ? [palette.secondary, palette.primary]
-                            : [palette.primary, palette.secondary]
+            GeometryReader { proxy in
+                let width = proxy.size.width
+                let columns = Self.columns(for: width)
 
-                        FanArtTile(title: "Fan Art #\(index + 1)", colors: colors)
+                ScrollView {
+                    LazyVGrid(columns: columns, spacing: 16) {
+                        ForEach(0..<12, id: \.self) { index in
+                            let isEven = index.isMultiple(of: 2)
+                            let colors: [Color] = isEven
+                                ? [palette.secondary, palette.primary]
+                                : [palette.primary, palette.secondary]
+
+                            FanArtTile(title: "Fan Art #\(index + 1)", colors: colors)
+                        }
                     }
+                    .padding(16)
                 }
-                .padding(16)
+                .background(
+                    ZStack {
+                        palette.background.ignoresSafeArea()
+                    }
+                )
             }
-            .background(
-                ZStack {
-                    palette.background.ignoresSafeArea()
-                }
-            )
             .navigationTitle("Fan Art")
             .toolbarBackground(.clear, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbarColorScheme(.light, for: .navigationBar)
-            .toolbar {
-                // Removed leading debug/status chip
-            }
         }
         .tint(theme.palette(for: colorScheme).primary)
+    }
+
+    private static func columns(for width: CGFloat) -> [GridItem] {
+        let count: Int
+        switch width {
+        case ..<600: count = 2
+        case 600..<900: count = 3
+        default: count = 4
+        }
+        return Array(repeating: GridItem(.flexible(), spacing: 16), count: count)
     }
 }
 
@@ -84,3 +95,4 @@ private struct FanArtTile: View {
     FanArtView()
         .environmentObject(ThemeManager())
 }
+

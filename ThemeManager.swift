@@ -35,13 +35,45 @@ struct ThemePalette {
 }
 
 final class ThemeManager: ObservableObject {
+    // Local persistence inside the app container
     @AppStorage("selectedTheme") private var storedTheme: Int = AppTheme.pink.rawValue {
-        didSet { objectWillChange.send() }
+        didSet {
+            // Notify observers within the app
+            objectWillChange.send()
+            // Mirror to the shared App Group so the widget can read it
+            writeSharedTheme(storedTheme)
+        }
+    }
+
+    // MARK: - App Group configuration
+    // Replace with your real App Group if it changes in the future.
+    private let appGroupID = "group.com.Meowbah"
+    private let sharedThemeKey = "selectedTheme"
+
+    init() {
+        // On startup, prefer the shared value if present so app and widget are aligned.
+        if let shared = UserDefaults(suiteName: appGroupID)?.object(forKey: sharedThemeKey) as? Int,
+           AppTheme(rawValue: shared) != nil {
+            // This will also write back to local @AppStorage via the setter below
+            storedTheme = shared
+        } else {
+            // Ensure the current local value is mirrored to the shared store
+            writeSharedTheme(storedTheme)
+        }
     }
 
     var theme: AppTheme {
         get { AppTheme(rawValue: storedTheme) ?? .pink }
         set { storedTheme = newValue.rawValue }
+    }
+
+    // MARK: - Shared defaults mirroring
+
+    private func writeSharedTheme(_ value: Int) {
+        guard let shared = UserDefaults(suiteName: appGroupID) else { return }
+        shared.set(value, forKey: sharedThemeKey)
+        // Not strictly necessary, but ensures the value is flushed promptly.
+        shared.synchronize()
     }
 
     // Compute a palette for a given color scheme (no stored scheme needed).
